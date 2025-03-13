@@ -8,7 +8,7 @@
 #define LEFT_CLK_A_PIN 2
 #define LEFT_B_PIN 4
 
-#define LEFT_ENC_DIR 1
+#define LEFT_ENC_DIR -1
 
 #define ENC_PWR 12
 #define GEAR_RATIO 30
@@ -70,7 +70,7 @@ void left_enc_handler()
     left_enc_old = left_enc;
 }
 
-void left_enc_tick()
+float left_enc_tick()
 {
     noInterrupts();
     const int left_counter_inc = g_left_counter;
@@ -78,4 +78,11 @@ void left_enc_tick()
     interrupts();
 
     g_left_phi += left_counter_inc * TIKS_TO_RAD;
+
+    return g_left_phi;
+}
+
+void left_enc_zero()
+{
+    g_left_phi = 0;
 }

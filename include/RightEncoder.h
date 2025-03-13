@@ -68,7 +68,7 @@ void right_enc_handler()
     right_enc_old = right_enc;
 }
 
-void right_enc_tick()
+float right_enc_tick()
 {
     noInterrupts();
     const int right_counter_inc = g_right_counter;
@@ -76,4 +76,11 @@ void right_enc_tick()
     interrupts();
 
     g_right_phi += right_counter_inc * TIKS_TO_RAD;
+
+    return g_right_phi;
+}
+
+void right_enc_zero()
+{
+    g_right_phi = 0;
 }
