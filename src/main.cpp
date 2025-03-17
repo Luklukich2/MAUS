@@ -187,7 +187,7 @@ void loop()
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
-  // velest_tick();
+  velest_tick();
 
   // left_vel_estimator(g_left_phi);
   // left_low_pass_filter(left_w_raw);
