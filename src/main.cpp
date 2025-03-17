@@ -141,7 +141,7 @@ void left()
     left_speed_reg(0);
     right_speed_reg(5);
 
-    if (left_enc >= 0 || right_enc >= L_TURN_RAD)
+    if (left_enc >= ZERO_RAD || right_enc >= L_TURN_RAD)
     {
       break;
     }
@@ -168,14 +168,14 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  // fwd();
+  fwd();
   left();
-  // fwd();
-  // left();
-  // fwd();
-  // left();
-  // fwd();
-  // left();
+  fwd();
+  left();
+  fwd();
+  left();
+  fwd();
+  left();
   stop();
 
 }
@@ -196,7 +196,7 @@ void loop()
   // r_motor_tick(g_right_w);
   // l_motor_tick(g_left_w);
 
-  // Serial.print(g_left_w);
-  // Serial.print(" ");
-  // Serial.println(g_right_w);
+  Serial.print(g_left_w);
+  Serial.print(" ");
+  Serial.println(g_right_w);
 }

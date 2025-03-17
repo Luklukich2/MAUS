@@ -18,3 +18,4 @@
 #define FWD_RAD           6.28
 #define R_TURN_RAD        7.05
 #define L_TURN_RAD        7.05
+#define ZERO_RAD          1.00
