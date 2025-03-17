@@ -41,6 +41,25 @@ float g_right_w;
 float left_w_raw;
 float right_w_raw;
 
+float left_velest_tick()
+{
+    const float left_phi = g_left_phi;
+    const float left_w_raw = left_vel_estimator(left_phi);
+    g_left_w = left_low_pass_filter(left_w_raw);
+
+    return g_left_w;
+}
+
+float right_velest_tick()
+{
+    const float right_phi = g_right_phi;
+    const float right_w_raw = right_vel_estimator(right_phi);
+    g_right_w = right_low_pass_filter(right_w_raw);
+
+    return g_right_w;
+}
+
+
 void velest_tick()
 {
     const float left_phi = g_left_phi;
@@ -51,7 +70,6 @@ void velest_tick()
 
     g_left_w = left_low_pass_filter(left_w_raw);
     g_right_w = right_low_pass_filter(right_w_raw);
-
 }
 
 float vel_pi_reg(float err, float max_output)
@@ -69,8 +87,6 @@ float vel_pi_reg(float err, float max_output)
     if (u == constrain(u, -max_output, max_output) || (err * u) < 0)
     {
        I+= err * Ts_s;
-
-
     }
     return u;
 }
