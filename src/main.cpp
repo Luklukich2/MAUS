@@ -13,28 +13,28 @@
 void wait()
 {
   static int32_t timer = micros();
-  while (micros() - timer < Ts_us);
+  while (micros() - timer < Ts_us)
+    ;
   timer = micros();
 }
 
-
 float left_speed_mind(float err, float max_output)
 {
-    const float K = 3;
-    const float T = 0.01;
-    const float Kp = K;
-    const float Ki = K / T;
+  const float K = 0.3;
+  const float T = 0.01;
+  const float Kp = K;
+  const float Ki = K / T;
 
-    const float p = err * Kp;
-    static float I = 0;
-    const float i = I * Ki;
-    float ur = p * i;
+  const float p = err * Kp;
+  static float I = 0;
+  const float i = I * Ki;
+  float ur = p + i;
 
-    if (ur == constrain(ur, -max_output, max_output) || (err * ur) < 0)
-    {
-       I+= err * Ts_s;
-    }
-    return ur;
+  if (ur == constrain(ur, -max_output, max_output) || (err * ur) < 0)
+  {
+    I += err * Ts_s;
+  }
+  return ur;
 }
 
 void left_speed_reg(float L_wish_speed)
@@ -47,21 +47,21 @@ void left_speed_reg(float L_wish_speed)
 
 float right_speed_mind(float err, float max_output)
 {
-    const float K = 3;
-    const float T = 0.01;
-    const float Kp = K;
-    const float Ki = K / T;
+  const float K = 0.3;
+  const float T = 0.01;
+  const float Kp = K;
+  const float Ki = K / T;
 
-    const float p = err * Kp;
-    static float I = 0;
-    const float i = I * Ki;
-    float ul = p * i;
+  const float p = err * Kp;
+  static float I = 0;
+  const float i = I * Ki;
+  float ul = p + i;
 
-    if (ul == constrain(ul, -max_output, max_output) || (err * ul) < 0)
-    {
-       I+= err * Ts_s;
-    }
-    return ul;
+  if (ul == constrain(ul, -max_output, max_output) || (err * ul) < 0)
+  {
+    I += err * Ts_s;
+  }
+  return ul;
 }
 
 void right_speed_reg(float R_wish_speed)
@@ -72,8 +72,7 @@ void right_speed_reg(float R_wish_speed)
   r_motor_tick(u_r);
 }
 
-
-void fwd()
+void fwd(float targ)
 {
   left_enc_zero();
   right_enc_zero();
@@ -84,14 +83,16 @@ void fwd()
     wait();
     // SENSE
     uint32_t time = millis() - start_time;
+    float cell_size = 6.28;
     float left_enc = left_enc_tick();
     float right_enc = right_enc_tick();
+    float Target = cell_size * targ;
     // PLAN
     // ACT
     left_speed_reg(5);
     right_speed_reg(5);
 
-    if (left_enc >= FWD_RAD || right_enc >= FWD_RAD)
+    if (left_enc >= Target || right_enc >= Target)
     {
       break;
     }
@@ -114,9 +115,9 @@ void right()
     // PLAN
     // ACT
     left_speed_reg(5);
-    right_speed_reg(0);
+    right_speed_reg(-5);
 
-    if (left_enc >= R_TURN_RAD || right_enc >= 0)
+    if (left_enc >= R_TURN_RAD)
     {
       break;
     }
@@ -138,10 +139,10 @@ void left()
     float right_enc = right_enc_tick();
     // PLAN
     // ACT
-    left_speed_reg(0);
+    left_speed_reg(-5);
     right_speed_reg(5);
 
-    if (left_enc >= ZERO_RAD || right_enc >= L_TURN_RAD)
+    if (right_enc >= L_TURN_RAD)
     {
       break;
     }
@@ -158,6 +159,67 @@ void stop()
   r_motor_tick(u_r);
 }
 
+void drive_to(float targX, float targY)
+{
+  if (targX < 0)
+  {
+    right();
+    right();
+    stop();
+  }
+  fwd(abs(targX));
+  if (targX * targY < 0)
+  {
+    left();
+  }
+  else
+  {
+    right();
+  }
+  fwd(abs(targY));
+  stop();
+}
+
+void turn(float angle_deg)
+{
+  uint32_t start_time = millis();
+  left_enc_zero();
+  right_enc_zero();
+  float s_L;
+  float s_R;
+  if (angle_deg < 0)
+  {
+    s_L = -5;
+    s_R = 5;
+  }
+  else
+  {
+    s_L = 5;
+    s_R = -5;
+  }
+  float S = abs(angle_deg) / 360.0 * M_PI * WRobot;
+  float N = S / WHEEL_CIRC;
+  float phi = N * (M_PI * 2);
+  while (true)
+  {
+    // TIMER
+    wait();
+    // SENSE
+    uint32_t time = millis() - start_time;
+    float left_enc = left_enc_tick();
+    float right_enc = right_enc_tick();
+    // PLAN
+    // ACT
+    left_speed_reg(s_L);
+    right_speed_reg(s_R);
+
+    if (abs(right_enc) >= phi)
+    {
+      break;
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -168,16 +230,8 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  fwd();
-  left();
-  fwd();
-  left();
-  fwd();
-  left();
-  fwd();
-  left();
+  turn(-90);
   stop();
-
 }
 
 void loop()
