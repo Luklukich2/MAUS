@@ -11,7 +11,6 @@
 #define LEFT_ENC_DIR -1
 
 #define ENC_PWR 12
-#define GEAR_RATIO 30
 
 void left_enc_handler();
 

@@ -10,11 +10,12 @@
 #include "Left_Motor.h"
 #include "Right_Motor.h"
 
+float or_robot_deg = 0;
+
 void wait()
 {
   static int32_t timer = micros();
-  while (micros() - timer < Ts_us)
-    ;
+  while (micros() - timer < Ts_us);
   timer = micros();
 }
 
@@ -159,27 +160,6 @@ void stop()
   r_motor_tick(u_r);
 }
 
-void drive_to(float targX, float targY)
-{
-  if (targX < 0)
-  {
-    right();
-    right();
-    stop();
-  }
-  fwd(abs(targX));
-  if (targX * targY < 0)
-  {
-    left();
-  }
-  else
-  {
-    right();
-  }
-  fwd(abs(targY));
-  stop();
-}
-
 void turn(float angle_deg)
 {
   uint32_t start_time = millis();
@@ -187,6 +167,7 @@ void turn(float angle_deg)
   right_enc_zero();
   float s_L;
   float s_R;
+  float K = 0.85;
   if (angle_deg < 0)
   {
     s_L = -5;
@@ -199,7 +180,7 @@ void turn(float angle_deg)
   }
   float S = abs(angle_deg) / 360.0 * M_PI * WRobot;
   float N = S / WHEEL_CIRC;
-  float phi = N * (M_PI * 2);
+  float phi = (N * (M_PI * 2)) * K;
   while (true)
   {
     // TIMER
@@ -220,6 +201,38 @@ void turn(float angle_deg)
   }
 }
 
+void set_or_robot(float deg)
+{
+  float err_orient = deg - or_robot_deg;
+  turn(err_orient);
+  or_robot_deg += err_orient;
+}
+
+void drive_to(float targX, float targY)
+{
+  if (targX < 0)
+  {
+    set_or_robot(D180);
+    stop();
+  }
+  else
+  {
+    set_or_robot(0);
+    stop();
+  }
+  fwd(abs(targX));
+  if (targY < 0)
+  {
+    set_or_robot(R);
+  }
+  else
+  {
+    set_or_robot(L);
+  }
+  fwd(abs(targY));
+  stop();
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -230,13 +243,22 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  turn(-90);
-  stop();
+  while (true)
+  {
+    int comm = 0;
+    if(Serial.available())
+    {
+      comm = Serial.parseFloat();
+    }
+    if(comm != 0)
+    {
+      drive_to(comm, 0);
+    }
+  }
 }
 
 void loop()
 {
-
   float left_enc = left_enc_tick();
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();

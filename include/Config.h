@@ -20,3 +20,6 @@
 #define L_TURN_RAD        3.525
 #define ZERO_RAD          1.00
 #define WHEEL_CIRC        100.50
+#define L            -90.0
+#define R            90.0
+#define D180          180.0
