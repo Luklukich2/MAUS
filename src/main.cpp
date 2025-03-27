@@ -167,7 +167,7 @@ void turn(float angle_deg)
   right_enc_zero();
   float s_L;
   float s_R;
-  float K = 0.85;
+  float K = 0.88;
   if (angle_deg < 0)
   {
     s_L = -5;
@@ -245,14 +245,15 @@ void setup()
 
   while (true)
   {
-    int comm = 0;
+    int comm1 = 0;
+    int comm2 = 0;
     if(Serial.available())
     {
-      comm = Serial.parseFloat();
+      comm1 = Serial.parseFloat(); comm2 = Serial.parseFloat();
     }
-    if(comm != 0)
+    if(comm1 != 0 || comm2 != 0)
     {
-      drive_to(comm, 0);
+      drive_to(comm1, comm2);
     }
   }
 }
