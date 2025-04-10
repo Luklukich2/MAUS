@@ -9,8 +9,18 @@
 #include "ASMR.h"
 #include "Left_Motor.h"
 #include "Right_Motor.h"
+#include "Radio.h"
+#include "RF24.h"
+#include "RF24_config.h"
 
 float or_robot_deg = 0;
+float x_or_robot = 0;
+float y_or_robot = 0;
+int comm1 = 0;
+int comm2 = 0;
+float S_r = 0;
+float S_l = 0;
+int mess = 1;
 
 void wait()
 {
@@ -208,6 +218,52 @@ void set_or_robot(float deg)
   or_robot_deg += err_orient;
 }
 
+void drive_to_line(float side)
+{
+  while(true)
+  {
+    float S_r = analogRead(A2);
+    float S_l = analogRead(A1);
+    if (side == R)
+    {
+      // Serial.println(S_r);
+      left_speed_reg(5);
+      right_speed_reg(-5);
+      if (S_r > 560)
+      { 
+        stop();
+        break;
+      }
+    }
+    if (side == L)
+    {
+      left_speed_reg(-5);
+      right_speed_reg(5);
+      if(S_l > 560)
+      {
+        stop();
+        break;
+      }
+    }
+    if (side == F)
+    {
+      left_speed_reg(5);
+      right_speed_reg(5);
+      if(S_l > 870 && S_r > 870)
+      {
+        stop();
+        break;
+      }
+    }
+  }
+}
+
+void drive_intersection(int count)
+{
+  fwd(count);
+  stop();
+}
+
 void drive_to(float targX, float targY)
 {
   if (targX < 0)
@@ -243,19 +299,25 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  while (true)
-  {
-    int comm1 = 0;
-    int comm2 = 0;
-    if(Serial.available())
-    {
-      comm1 = Serial.parseFloat(); comm2 = Serial.parseFloat();
-    }
-    if(comm1 != 0 || comm2 != 0)
-    {
-      drive_to(comm1, comm2);
-    }
-  }
+  radio_setup();
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+
+  // drive_intersection(2);
+  // drive_to_line(R);
+  // while (true)
+  // {
+  //   if(Serial.available())
+  //   {
+  //     comm1 = Serial.parseFloat(); comm2 = Serial.parseFloat();
+  //   }
+  //   if(comm1 != 0 || comm2 != 0)
+  //   {
+  //     float X = (comm1 - x_or_robot);
+  //     float Y = (comm2 - y_or_robot);
+  //     drive_to(X, Y);
+  //   } 
+  // }
 }
 
 void loop()
@@ -264,8 +326,17 @@ void loop()
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
+  S_r = analogRead(A2);
+  S_l = analogRead(A1);
   velest_tick();
 
+  radio_write(mess);
+  // float u = 0;
+  // float k = 0.002;
+  // float err = S_r - S_l;
+  // u = err*k;
+  // right_speed_reg(1.5 - u);
+  // left_speed_reg(1.5 + u);
   // left_vel_estimator(g_left_phi);
   // left_low_pass_filter(left_w_raw);
   // right_vel_estimator(g_right_phi);
@@ -273,7 +344,7 @@ void loop()
   // r_motor_tick(g_right_w);
   // l_motor_tick(g_left_w);
 
-  Serial.print(g_left_w);
-  Serial.print(" ");
-  Serial.println(g_right_w);
+  // Serial.print(S_r);
+  // Serial.print(" ");
+  // Serial.println(S_l);
 }
