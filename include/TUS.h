@@ -9,7 +9,7 @@
 
 float TUS(float  TETA0)
 {
-    float Wd0 = TETA0*(WRobot/R);
+    float Wd0 = TETA0*(WRobot/Radius);
 
     return Wd0;
 }

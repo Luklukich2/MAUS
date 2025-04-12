@@ -10,7 +10,7 @@
 #define TIKS_TO_RAD   (2.0 * M_PI / (ENC_PPR * GEAR_RATIO))
 
 #define LPF_ALPHA         1.0
-#define R                 16.0
+#define Radius            16.0
 #define Rw                32.0
 #define WRobot            82.0
 #define FORW_SPEED        10.0
@@ -20,7 +20,7 @@
 #define L_TURN_RAD        3.525
 #define ZERO_RAD          1.00
 #define WHEEL_CIRC        100.50
-#define L                 -90.0
-#define R                 90.0
+#define Left              -90.0
+#define Right             90.0
 #define D180              180.0
-#define F                 0.0
+#define Forward           0.0
