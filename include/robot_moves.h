@@ -10,7 +10,8 @@ float or_robot_deg;
 void wait()
 {
   static int32_t timer = micros();
-  while (micros() - timer < Ts_us);
+  while (micros() - timer < Ts_us)
+    ;
   timer = micros();
 }
 
@@ -149,9 +150,9 @@ void turn(float angle_deg)
   }
 }
 
-void drive_to_line(float side, float cross, float f_cross)
+void drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
 {
-  while(true)
+  while (true)
   {
     float S_r = analogRead(A2);
     float S_l = analogRead(A1);
@@ -161,7 +162,7 @@ void drive_to_line(float side, float cross, float f_cross)
       left_speed_reg(5);
       right_speed_reg(-5);
       if (S_r > 870)
-      { 
+      {
         stop();
         break;
       }
@@ -170,7 +171,7 @@ void drive_to_line(float side, float cross, float f_cross)
     {
       left_speed_reg(-5);
       right_speed_reg(5);
-      if(S_l > 870)
+      if (S_l > 870)
       {
         stop();
         break;
@@ -178,20 +179,26 @@ void drive_to_line(float side, float cross, float f_cross)
     }
     if (side == Forward)
     {
-      if(S_l > 870 && S_r > 870)
+      fwd(wish_sect);
+      if (S_l > 870 && S_r > 870)
       {
-        stop();
         if (f_cross == 0)
         {
           f_cross = 1;
           cross += 1;
         }
-        break;
-      }else{
-        if(f_cross == 1)
+      }
+      else
+      {
+        if (f_cross == 1)
         {
           f_cross = 0;
         }
+      }
+      if (cross == wish_cross)
+      {
+        stop();
+        break;
       }
     }
   }
