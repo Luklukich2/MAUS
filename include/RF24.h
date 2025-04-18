@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  Copyright (C) 2011 J. Coliz <maniacbug@ymail.com>
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Config.h"
 #include "LeftEncoder.h"
 #include "Left_Motor.h"
@@ -10,9 +12,49 @@ float or_robot_deg;
 void wait()
 {
   static int32_t timer = micros();
-  while (micros() - timer < Ts_us)
-    ;
+  while (micros() - timer < Ts_us);
   timer = micros();
+}
+
+void turn(float angle_deg)
+{
+  uint32_t start_time = millis();
+  left_enc_zero();
+  right_enc_zero();
+  float s_L;
+  float s_R;
+  float K = 0.85;
+  if (angle_deg < 0)
+  {
+    s_L = -5;
+    s_R = 5;
+  }
+  else
+  {
+    s_L = 5;
+    s_R = -5;
+  }
+  float S = abs(angle_deg) / 360.0 * M_PI * WRobot;
+  float N = S / WHEEL_CIRC;
+  float phi = (N * (M_PI * 2)) * K;
+  while (true)
+  {
+    // TIMER
+    wait();
+    // SENSE
+    uint32_t time = millis() - start_time;
+    float left_enc = left_enc_tick();
+    float right_enc = right_enc_tick();
+    // PLAN
+    // ACT
+    left_speed_reg(s_L);
+    right_speed_reg(s_R);
+
+    if (abs(right_enc) >= phi)
+    {
+      break;
+    }
+  }
 }
 
 void set_or_robot(float deg)
@@ -39,8 +81,16 @@ void fwd(float targ)
     float Target = cell_size * targ;
     // PLAN
     // ACT
-    left_speed_reg(5);
-    right_speed_reg(5);
+    if (targ < 0)
+    {
+      left_speed_reg(-5);
+      right_speed_reg(-5);
+    }
+    if (targ > 0)
+    {
+      left_speed_reg(5);
+      right_speed_reg(5);
+    }
 
     if (left_enc >= Target || right_enc >= Target)
     {
@@ -109,47 +159,6 @@ void stop()
   r_motor_tick(u_r);
 }
 
-void turn(float angle_deg)
-{
-  uint32_t start_time = millis();
-  left_enc_zero();
-  right_enc_zero();
-  float s_L;
-  float s_R;
-  float K = 0.88;
-  if (angle_deg < 0)
-  {
-    s_L = -5;
-    s_R = 5;
-  }
-  else
-  {
-    s_L = 5;
-    s_R = -5;
-  }
-  float S = abs(angle_deg) / 360.0 * M_PI * WRobot;
-  float N = S / WHEEL_CIRC;
-  float phi = (N * (M_PI * 2)) * K;
-  while (true)
-  {
-    // TIMER
-    wait();
-    // SENSE
-    uint32_t time = millis() - start_time;
-    float left_enc = left_enc_tick();
-    float right_enc = right_enc_tick();
-    // PLAN
-    // ACT
-    left_speed_reg(s_L);
-    right_speed_reg(s_R);
-
-    if (abs(right_enc) >= phi)
-    {
-      break;
-    }
-  }
-}
-
 void drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
 {
   while (true)
@@ -180,6 +189,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     if (side == Forward)
     {
       fwd(wish_sect);
+      stop();
       if (S_l > 870 && S_r > 870)
       {
         if (f_cross == 0)

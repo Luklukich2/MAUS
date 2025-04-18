@@ -1,3 +1,5 @@
+#pragma once
+
 #include "RF24.h"
 #include "RF24_config.h"
 

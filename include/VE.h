@@ -72,22 +72,22 @@ void velest_tick()
     g_right_w = right_low_pass_filter(right_w_raw);
 }
 
-float vel_pi_reg(float err, float max_output)
-{
-    const float K = 3;
-    const float T = 0.01;
-    const float Kp = K;
-    const float Ki = K / T;
+// float vel_pi_reg(float err, float max_output)
+// {
+//     const float K = 3;
+//     const float T = 0.01;
+//     const float Kp = K;
+//     const float Ki = K / T;
 
-    const float p = err * Kp;
-    static float I = 0;
-    const float i = I * Ki;
-    float u = p * i;
+//     const float p = err * Kp;
+//     static float I = 0;
+//     const float i = I * Ki;
+//     float u = p * i;
 
-    if (u == constrain(u, -max_output, max_output) || (err * u) < 0)
-    {
-       I+= err * Ts_s;
-    }
-    return u;
-}
+//     if (u == constrain(u, -max_output, max_output) || (err * u) < 0)
+//     {
+//        I+= err * Ts_s;
+//     }
+//     return u;
+// }
 
