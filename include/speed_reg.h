@@ -24,7 +24,7 @@ float speed_mind(float err, float max_output)
   }
   return ur;
 }
-// 
+
 void left_speed_reg(float L_wish_speed)
 {
   float left_enc = left_enc_tick();

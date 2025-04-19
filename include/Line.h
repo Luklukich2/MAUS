@@ -3,10 +3,10 @@
 #include "Config.h"
 #include "speed_reg.h"
 
-void drive_line(float k, float S_r, float S_l)
+void drive_line(float S_r, float S_l)
 {
     float u = 0;
-    float kef = 0.002;
+    float kef = 0.01;
     float err = S_r - S_l;
     u = err*kef;
     right_speed_reg(1.5 - u);

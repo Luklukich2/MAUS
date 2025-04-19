@@ -32,10 +32,11 @@ int loc_crack[4][5]{
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
 };
+
 enum
 {
-  init0,
   tier0,
+  turn0,
   home0,
   tier1,
   home1,
@@ -43,11 +44,28 @@ enum
   home2,
   tier3,
   home3,
-  write_data,
   stop0,
 };
 
-int state = init0;
+float read_cross()
+{
+  if(S_l >= 630 && S_r >= 630)
+  {
+    if(f_cross == 0)
+    {
+      f_cross = 1;
+      cross += 1;
+    }
+  }else{
+    if(f_cross == 1)
+    {
+      f_cross = 0;
+    }
+  }
+  return cross;
+}
+
+int state = tier0;
 
 void setup()
 {
@@ -84,115 +102,26 @@ void loop()
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
-  S_r = analogRead(A2);
+  S_r = analogRead(A0);
   S_l = analogRead(A1);
   velest_tick();
 
   switch (state)
   {
-  case init0:
-    fwd(0.6);
-    stop();
-    set_or_robot(180);
-    fwd(0.6);
-    set_or_robot(0);
-    stop();
-    state = tier0;
   case tier0:
-    left_speed_reg(2.5);
-    right_speed_reg(2.5);
-    if (S_l >= 870 && S_r >= 870)
+    drive_line(S_r, S_l);
+    cross = read_cross();
+    if (cross == 4)
     {
       stop();
-      loc_crack[2][1] = 1;
+      state = turn0;
+      break;
     }
+  case turn0:
+    drive_to_line(Left, 0, 0, 0, 0);
     state = 45;
-  // case home0:
-  //   drive_to(-3, 1);
-  //   right();
-  //   state = 45;
-  // case tier1:
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[3][1] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[3][2] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[3][3] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[3][4] = 1;
-  //   }
-  //   state = home1;
-  // case home1:
-  //   drive_to(-4, 1);
-  //   right();
-  //   state = tier2;
-  // case tier2:
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[2][1] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[2][2] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[2][3] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[2][4] = 1;
-  //   }
-  //   state = home2;
-  // case home2:
-  //   drive_to(-4, 1);
-  //   right();
-  //   state = tier3;
-  // case tier3:
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[1][1] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[1][2] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[1][3] = 1;
-  //   }
-  //   drive_to_line(Forward, 0, 0, 1, 1);
-  //   if (cross == 1)
-  //   {
-  //     loc_crack[1][4] = 1;
-  //   }
-  //   state = home3;
-  // case home3:
-  //   drive_to(-4, -3);
-  //   right();
-  //   state = write_data;
-  // case write_data:
-  //   Serial.println(loc_crack[2][1]);
-  //   state = stop0;
-  case stop0:
-    stop();
+    break;
+  default:
+    break;
   }
 }
