@@ -163,14 +163,14 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
 {
   while (true)
   {
-    float S_r = analogRead(A2);
+    float S_r = analogRead(A0);
     float S_l = analogRead(A1);
     if (side == Right)
     {
       // Serial.println(S_r);
       left_speed_reg(5);
       right_speed_reg(-5);
-      if (S_r > 870)
+      if (S_r > 630)
       {
         stop();
         break;
@@ -180,7 +180,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     {
       left_speed_reg(-5);
       right_speed_reg(5);
-      if (S_l > 870)
+      if (S_l > 630)
       {
         stop();
         break;

@@ -20,8 +20,6 @@ float x_or_robot = 0;
 float y_or_robot = 0;
 int comm1 = 0;
 int comm2 = 0;
-float S_r = 0;
-float S_l = 0;
 int mess = 1;
 int cross = 0;
 int f_cross = 0;
@@ -33,22 +31,10 @@ int loc_crack[4][5]{
     0, 0, 0, 0, 0,
 };
 
-enum
-{
-  tier0,
-  turn0,
-  home0,
-  tier1,
-  home1,
-  tier2,
-  home2,
-  tier3,
-  home3,
-  stop0,
-};
-
 float read_cross()
 {
+  float S_l = analogRead(A0);
+  float S_r = analogRead(A1);
   if(S_l >= 630 && S_r >= 630)
   {
     if(f_cross == 0)
@@ -65,7 +51,7 @@ float read_cross()
   return cross;
 }
 
-int state = tier0;
+int state = 1;
 
 void setup()
 {
@@ -81,19 +67,80 @@ void setup()
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
 
-  // while (true)
-  // {
-  //   if(Serial.available())
-  //   {
-  //     comm1 = Serial.parseFloat(); comm2 = Serial.parseFloat();
-  //   }
-  //   if(comm1 != 0 || comm2 != 0)
-  //   {
-  //     float X = (comm1 - x_or_robot);
-  //     float Y = (comm2 - y_or_robot);
-  //     drive_to(X, Y);
-  //   }
-  // }
+  while(true)
+  {
+    cross = read_cross();
+    drive_line();
+    if(cross == 4)
+    {
+      fwd(0.8);
+      stop();
+      cross = 0;
+      break;
+    }
+  }
+  while(true)
+  {
+    float S_l = analogRead(A1);
+    drive_to_line(Left, 0, 0, 0, 0);
+    break;
+  }
+  while(true)
+  {
+    drive_line();
+    cross = read_cross();
+    if(cross == 1)
+    {
+      cross = 0;
+      stop();
+      break;
+    }
+  }
+  while(true)
+  {
+    cross = read_cross();
+    turn(-1);
+    if(cross == 1)
+    {
+      cross = 0;
+      stop();
+      break;
+    }
+  }
+  while(true)
+  {
+    drive_to_line(Left, 0, 0, 0, 0);
+    break;
+  }
+  while(true)
+  {
+    cross = read_cross();
+    drive_line();
+    if(cross == 4)
+    {
+      fwd(0.8);
+      cross = 0;
+      stop();
+      break;
+    }
+  }
+  while(true)
+  {
+    float S_r = analogRead(A0);
+    drive_to_line(Right, 0, 0, 0, 0);
+    break;
+  }
+  while(true)
+  {
+    cross = read_cross();
+    turn(-1);
+    if(cross == 1)
+    {
+      cross = 0;
+      stop();
+      break;
+    }
+  }
 }
 
 void loop()
@@ -102,26 +149,5 @@ void loop()
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
-  S_r = analogRead(A0);
-  S_l = analogRead(A1);
   velest_tick();
-
-  switch (state)
-  {
-  case tier0:
-    drive_line(S_r, S_l);
-    cross = read_cross();
-    if (cross == 4)
-    {
-      stop();
-      state = turn0;
-      break;
-    }
-  case turn0:
-    drive_to_line(Left, 0, 0, 0, 0);
-    state = 45;
-    break;
-  default:
-    break;
-  }
 }
