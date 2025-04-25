@@ -78,7 +78,6 @@ void setup()
       cross = 0;
       break;
     }
-    break;
   }
   while(true)
   {
@@ -97,7 +96,6 @@ void setup()
       cross = 0;
       break;
     }
-    break;
   }
   while(true)
   {
@@ -115,14 +113,13 @@ void setup()
   {
     cross = read_cross();
     drive_line();
-    if(cross == 4)
+    if(cross == 5)
     {
       fwd(0.8);
       stop();
       cross = 0;
       break;
     }
-    break;
   }
 }
 
