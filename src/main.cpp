@@ -78,6 +78,7 @@ void setup()
       cross = 0;
       break;
     }
+    break;
   }
   while(true)
   {
@@ -87,25 +88,23 @@ void setup()
   }
   while(true)
   {
-    drive_line();
     cross = read_cross();
+    drive_line();
     if(cross == 1)
     {
-      cross = 0;
+      fwd(0.7);
       stop();
+      cross = 0;
       break;
     }
+    break;
   }
   while(true)
   {
-    cross = read_cross();
-    turn(-1);
-    if(cross == 1)
-    {
-      cross = 0;
-      stop();
-      break;
-    }
+    right_speed_reg(5);
+    delay(250);
+    stop();
+    break;
   }
   while(true)
   {
@@ -119,27 +118,11 @@ void setup()
     if(cross == 4)
     {
       fwd(0.8);
-      cross = 0;
       stop();
+      cross = 0;
       break;
     }
-  }
-  while(true)
-  {
-    float S_r = analogRead(A0);
-    drive_to_line(Right, 0, 0, 0, 0);
     break;
-  }
-  while(true)
-  {
-    cross = read_cross();
-    turn(-1);
-    if(cross == 1)
-    {
-      cross = 0;
-      stop();
-      break;
-    }
   }
 }
 
