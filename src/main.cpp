@@ -67,7 +67,7 @@ void setup()
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
 
-  while(true)
+  while(true) // проезд по 1 ряду
   {
     cross = read_cross();
     drive_line();
@@ -76,16 +76,17 @@ void setup()
       fwd(0.8);
       stop();
       cross = 0;
+      
       break;
     }
   }
-  while(true)
+  while(true) // съезд на промежуток 12
   {
     float S_l = analogRead(A1);
     drive_to_line(Left, 0, 0, 0, 0);
     break;
   }
-  while(true)
+  while(true) // проезд по промжутку 12
   {
     cross = read_cross();
     drive_line();
@@ -97,25 +98,73 @@ void setup()
       break;
     }
   }
-  while(true)
+  while(true) // доворот с промежутка
   {
     right_speed_reg(5);
     delay(250);
     stop();
     break;
   }
-  while(true)
+  while(true) // поворот на 2 ряд
   {
     drive_to_line(Left, 0, 0, 0, 0);
     break;
   }
-  while(true)
+  while(true) // проезд по 2 ряду
   {
     cross = read_cross();
     drive_line();
     if(cross == 5)
     {
-      fwd(0.8);
+      fwd(0.7);
+      stop();
+      cross = 0;
+      break;
+    }
+  }
+  while(true) // съезд на промежуток 23
+  {
+    drive_to_line(Right, 0, 0, 0, 0);
+    break;
+  }
+  while(true) // доворот на промежуток 23
+  {
+    left_speed_reg(5);
+    delay(650);
+    stop();
+    break;
+  }
+  while(true) // проезд по промежутку 23
+  {
+    cross = read_cross();
+    drive_line();
+    if(cross == 1)
+    {
+      fwd(0.7);
+      stop();
+      cross = 0;
+      break;
+    }
+  }
+  while(true) // доезд с промежутка 23
+  {
+    left_speed_reg(5);
+    delay(250);
+    stop();
+    break;
+  }
+  while(true) // поворот на 3 ряд
+  {
+    drive_to_line(Right, 0, 0, 0, 0);
+    break; 
+  }
+  while(true) // проезд по 3 ряду
+  {
+    cross = read_cross();
+    drive_line();
+    if(cross == 4)
+    {
+      fwd(0.7);
       stop();
       cross = 0;
       break;
