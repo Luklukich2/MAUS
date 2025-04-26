@@ -69,16 +69,7 @@ void setup()
 
   while(true) // проезд по 1 ряду
   {
-    cross = read_cross();
-    drive_line();
-    if(cross == 4)
-    {
-      fwd(0.8);
-      stop();
-      cross = 0;
-      
-      break;
-    }
+    drive_cross(4);
   }
   while(true) // съезд на промежуток 12
   {
@@ -88,15 +79,7 @@ void setup()
   }
   while(true) // проезд по промжутку 12
   {
-    cross = read_cross();
-    drive_line();
-    if(cross == 1)
-    {
-      fwd(0.7);
-      stop();
-      cross = 0;
-      break;
-    }
+    drive_cross(1);
   }
   while(true) // доворот с промежутка
   {
@@ -112,15 +95,7 @@ void setup()
   }
   while(true) // проезд по 2 ряду
   {
-    cross = read_cross();
-    drive_line();
-    if(cross == 5)
-    {
-      fwd(0.7);
-      stop();
-      cross = 0;
-      break;
-    }
+    drive_cross(5);
   }
   while(true) // съезд на промежуток 23
   {
@@ -136,15 +111,7 @@ void setup()
   }
   while(true) // проезд по промежутку 23
   {
-    cross = read_cross();
-    drive_line();
-    if(cross == 1)
-    {
-      fwd(0.7);
-      stop();
-      cross = 0;
-      break;
-    }
+    drive_cross(1);
   }
   while(true) // доезд с промежутка 23
   {
@@ -160,15 +127,39 @@ void setup()
   }
   while(true) // проезд по 3 ряду
   {
-    cross = read_cross();
-    drive_line();
-    if(cross == 4)
-    {
-      fwd(0.7);
-      stop();
-      cross = 0;
-      break;
-    }
+    drive_cross(4);
+  }
+  while(true)
+  {
+     drive_to_line(Right, 0, 0, 0, 0);
+     break;
+  }
+  while(true)
+  {
+    left_speed_reg(5);
+    delay(870);
+    stop();
+    break;
+  }
+  while(true)
+  {
+    drive_cross(2);
+  }
+  while(true)
+  {
+    drive_to_line(Right, 0, 0, 0, 0);
+    break;
+  }
+  while(true)
+  {
+    left_speed_reg(5);
+    delay(870);
+    stop();
+    break;
+  }
+  while(true)
+  {
+    drive_cross(4);
   }
 }
 
