@@ -214,17 +214,6 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
   }
 }
 
-void drive_cross(float wish_cross)
-{
-  cross = read_cross();
-    drive_line();
-    if(cross == wish_cross)
-    {
-      fwd(0.7);
-      stop();
-      cross = 0;
-    }
-}
 void drive_to(float targX, float targY)
 {
   if (targX < 0)
