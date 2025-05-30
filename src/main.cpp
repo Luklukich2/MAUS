@@ -19,23 +19,24 @@
 
 uMQ radio;
 
-float orX = 0;
-float orY = 0;
+int orX = 0;
+int orY = 0;
 float x_or_robot = 0;
 float y_or_robot = 0;
+float H_sens = 1;
 int comm1 = 0;
 int comm2 = 0;
 int cross = 0;
 int f_cross = 0;
 
 String data;
+String send_data;
 String mess;
 
-int loc_crack[4][5]{
-    0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0,
+int loc_crack[3][5]{
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
 };
 
 int read_cross()
@@ -60,6 +61,16 @@ int read_cross()
   return cross;
 }
 
+void hole_read(int orX, int orY)
+{
+  while(true)
+  {
+    H_sens = digitalRead(A5);
+    loc_crack[orX][orY] = H_sens;
+    break;
+  }
+}
+
 void drive_cross(int wish_cross)
 {
   Serial.println("drive_cross(" + String(wish_cross) + ")");
@@ -67,6 +78,13 @@ void drive_cross(int wish_cross)
   {
     cross = read_cross();
     drive_line();
+    if(digitalRead(A5) == 0)
+    {
+      stop();
+      hole_read(orX, orY);
+      send_data = "X: " + String(orX) + ", Y: " + String(orY);
+      // X: 3, Y: 1
+    }
     if(cross == wish_cross)
     {
       fwd(0.7);
@@ -76,6 +94,8 @@ void drive_cross(int wish_cross)
     }
   }
 }
+
+
 
 int state = 1;
 
@@ -101,6 +121,10 @@ void setup()
   Serial.println("INIT COMPLETE");
 
 
+  // while(true)
+  // {
+  //   radio.send("1234", "DOBRY", 100);
+  // }
   while(true)
   {
     data = radio.recv("ALESH", 100);
@@ -144,9 +168,6 @@ void setup()
     drive_cross(1);
     orX += 1;
   }
-  Serial.print(orX);
-  Serial.print(" ");
-  Serial.println(orY);
   drive_to_line(Right, 0, 0, 0, 0);
   drive_cross(1);
   drive_cross(1);
@@ -155,6 +176,8 @@ void setup()
   drive_cross(1);
   drive_cross(1);
   drive_cross(1);
+  
+  radio.send(send_data, "DOBRY", 100);
 }
 
 void loop()
