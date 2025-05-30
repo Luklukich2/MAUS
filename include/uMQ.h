@@ -23,8 +23,10 @@ class uMQ
 
     bool send(String data, String address, uint32_t timeout = 1000)
     {
-      radio.stopListening();
+      radio.closeReadingPipe(0);
       radio.openWritingPipe((uint8_t*)address.c_str());
+      radio.stopListening();
+      delay(50);
       return radio.write(data.c_str(), data.length());
     }
 
@@ -43,7 +45,7 @@ class uMQ
         }
       }
 
-      char buf[32];
+      char buf[32] = {0};
 
       radio.read(&buf, sizeof(buf));
 

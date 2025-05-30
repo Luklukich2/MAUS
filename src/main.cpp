@@ -30,7 +30,7 @@ int cross = 0;
 int f_cross = 0;
 
 String data;
-String send_data;
+String send_data = "NO FAULT DETECTED";
 String mess;
 
 int loc_crack[3][5]{
@@ -63,12 +63,8 @@ int read_cross()
 
 void hole_read(int orX, int orY)
 {
-  while(true)
-  {
-    H_sens = digitalRead(A5);
-    loc_crack[orX][orY] = H_sens;
-    break;
-  }
+  H_sens = digitalRead(A5);
+  loc_crack[orX][orY] = H_sens;
 }
 
 void drive_cross(int wish_cross)
@@ -81,8 +77,10 @@ void drive_cross(int wish_cross)
     if(digitalRead(A5) == 0)
     {
       stop();
+      // Serial.println("MAGNET ACSESS");
       hole_read(orX, orY);
       send_data = "X: " + String(orX) + ", Y: " + String(orY);
+      // Serial.println(send_data);
       // X: 3, Y: 1
     }
     if(cross == wish_cross)
@@ -125,6 +123,8 @@ void setup()
   // {
   //   radio.send("1234", "DOBRY", 100);
   // }
+
+  radio.send("PROG START", "DOBRY", 100);
   while(true)
   {
     data = radio.recv("ALESH", 100);
@@ -136,6 +136,7 @@ void setup()
       break;
     }
   }
+  radio.send("ALESH GO", "DOBRY", 100);
   for(int i = 0; i < 4; i++)
   {
     drive_cross(1);
@@ -176,8 +177,13 @@ void setup()
   drive_cross(1);
   drive_cross(1);
   drive_cross(1);
-  
-  radio.send(send_data, "DOBRY", 100);
+  stop();
+
+  while(true)
+  {
+    radio.send(send_data, "DOBRY", 50);
+    // Serial.println(send_data);
+  }
 }
 
 void loop()
