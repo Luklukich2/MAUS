@@ -11,6 +11,6 @@ void drive_line()
     float kef = 0.002;
     float err = S_r - S_l;
     u = err*kef;
-    right_speed_reg(1.5 - u);
-    left_speed_reg(1.5 + u);
+    right_speed_reg(0.5 - u);
+    left_speed_reg(0.5 + u);
 }
