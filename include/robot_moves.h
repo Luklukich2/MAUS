@@ -88,11 +88,10 @@ void fwd(float targ)
     }
     if (targ > 0)
     {
-      left_speed_reg(5);
-      right_speed_reg(5);
+      drive_line(5);
     }
 
-    if (left_enc >= Target || right_enc >= Target)
+    if (abs(left_enc) >= abs(Target) || abs(right_enc) >= abs(Target))
     {
       break;
     }
@@ -161,6 +160,8 @@ void stop()
 
 void drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
 {
+  uint32_t time0 = millis();
+
   while (true)
   {
     float S_r = analogRead(A0);
@@ -170,7 +171,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
       // Serial.println(S_r);
       left_speed_reg(5);
       right_speed_reg(-5);
-      if (S_r > 630)
+      if (S_l > Line_threshold && millis() - time0 > TURN_DELAY)
       {
         stop();
         break;
@@ -180,7 +181,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     {
       left_speed_reg(-5);
       right_speed_reg(5);
-      if (S_l > 630)
+      if (S_r > Line_threshold && millis() - time0 > TURN_DELAY)
       {
         stop();
         break;
@@ -190,7 +191,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     {
       fwd(wish_sect);
       stop();
-      if (S_l > 870 && S_r > 870)
+      if (S_l > Line_threshold && S_r > Line_threshold)
       {
         if (f_cross == 0)
         {
@@ -212,6 +213,7 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
       }
     }
   }
+  fwd(-0.5);
 }
 
 void drive_to(float targX, float targY)

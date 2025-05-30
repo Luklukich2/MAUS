@@ -12,41 +12,44 @@
 #include "speed_reg.h"
 #include "Line.h"
 #include "robot_moves.h"
-#include "RF24.h"
-#include "RF24_config.h"
 #include "uMQ.h"
+// #include "Radio.h"
+// #include "RF24.h"
+// #include "RF24_config.h"
 
+uMQ radio;
+
+float orX = 0;
+float orY = 0;
 float x_or_robot = 0;
 float y_or_robot = 0;
 int comm1 = 0;
 int comm2 = 0;
 int cross = 0;
 int f_cross = 0;
-int orX = 1;
-int orY = 0;
-float H_sens = 1;
+
 String data;
 String mess;
-String addres;
-String send_data;
 
-int loc_crack[2][4]{
-    1, 1, 1, 1,
-    1, 1, 1, 1,   
+int loc_crack[4][5]{
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
 };
 
-uMQ radio;
-
-float read_cross()
+int read_cross()
 {
   float S_l = analogRead(A0);
   float S_r = analogRead(A1);
-  if(S_l >= 650 && S_r >= 650)
+  // Serial.println(String(S_l) + " " + String(S_r));
+  if(S_l >= Line_threshold && S_r >= Line_threshold)
   {
     if(f_cross == 0)
     {
       f_cross = 1;
       cross += 1;
+      Serial.println("cross = " + String(cross));
     }
   }else{
     if(f_cross == 1)
@@ -57,49 +60,30 @@ float read_cross()
   return cross;
 }
 
-void hole_read(int orX, int orY)
+void drive_cross(int wish_cross)
 {
+  Serial.println("drive_cross(" + String(wish_cross) + ")");
   while(true)
   {
-    H_sens = digitalRead(A5);
-    loc_crack[orX][orY] = H_sens;
-    break;
-  }
-}
-
-void drive_cross(float wish_cross)
-{
-  while(true)
-  {
-    drive_line();
     cross = read_cross();
+    drive_line();
     if(cross == wish_cross)
     {
+      fwd(0.7);
       stop();
-      hole_read(orX, orY);
+      cross = 0;
       break;
     }
   }
 }
 
-// void drive_cross(float wish_cross)
-// {
-//   cross = read_cross();
-//     drive_line();
-//     if(cross == wish_cross)
-//     {
-//       fwd(0.7);
-//       stop();
-//       cross = 0;
-//       break;
-//     }
-// }
-
-int state = 0;
+int state = 1;
 
 void setup()
 {
   Serial.begin(9600);
+
+  radio.init(A2, A3);
 
   left_enc_init();
   right_enc_init();
@@ -107,152 +91,70 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  pinMode(A0, INPUT);
+  // radio_setup();
   pinMode(A1, INPUT);
-  pinMode(7, OUTPUT);
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
+  pinMode(A2, INPUT);
 
-  radio.init(A2, A3);
-  
-  // while(true)
-  // {
-  //   Serial.println("Ожидаю данных...");
-  //   data = radio.recv("ALESH", 100);
-  //   Serial.println(data);
-  //   if(data != "")
-  //   {
-  //     mess = data.substring(6);
-  //     addres = data.substring(0, 5);
-  //     break;
-  //   }
-  // }
-  // if (mess == "start")
-  // {
-    while(true) // проезд по 1 ряду
+  left_speed_reg(0);
+  right_speed_reg(0);
+
+  Serial.println("INIT COMPLETE");
+
+
+  while(true)
+  {
+    data = radio.recv("ALESH", 100);
+    data.trim();
+    Serial.println(data);
+    if (data == "start")
     {
-      drive_line();
-      cross = read_cross();
-      if(digitalRead(A5) == 0)
-      {
-        hole_read(orX, orY);
-        stop();
-        break;
-      }
-    // }
-    send_data[0] = orX;
-    send_data[1] = orY;
-    radio.send(send_data, "DOBRY", 100);
+      Serial.println("START RECVD");
+      break;
+    }
   }
-  // while(true) // съезд на промежуток 12
-  // {
-  //   drive_to_line(Left, 0, 0, 0, 0);
-  //   break;
-  // }
-  // while(true) // проезд по промжутку 12
-  // {
-  //   right_speed_reg(5);
-  //   delay(970);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // доворот с промежутка
-  // {
-  //   drive_cross(1);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // поворот на 2 ряд
-  // {
-  //   drive_to_line(Left, 0, 0, 0, 0);
-  //   break;
-  // }
-  // while(true) // проезд по 2 ряду
-  // {
-  //   drive_cross(5);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // съезд на промежуток 23
-  // {
-  //   drive_to_line(Right, 0, 0, 0, 0);
-  //   break;
-  // }
-  // while(true) // доворот на промежуток 23
-  // {
-  //   left_speed_reg(5);
-  //   delay(870);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // проезд по промежутку 23
-  // {
-  //   drive_cross(1);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // доезд с промежутка 23
-  // {
-  //   left_speed_reg(5);
-  //   delay(870);
-  //   stop();
-  //   break;
-  // }
-  // while(true) // поворот на 3 ряд
-  // {
-  //   drive_to_line(Right, 0, 0, 0, 0);
-  //   break; 
-  // }
-  // while(true) // проезд по 3 ряду
-  // {
-  //   drive_cross(4);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // while(true)
-  // {
-  //    drive_to_line(Right, 0, 0, 0, 0);
-  //    break;
-  // }
-  // while(true)
-  // {
-  //   left_speed_reg(5);
-  //   delay(870);
-  //   stop();
-  //   break;
-  // }
-  // while(true)
-  // {
-  //   drive_cross(2);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // while(true)
-  // {
-  //   drive_to_line(Right, 0, 0, 0, 0);
-  //   break;
-  // }
-  // while(true)
-  // {
-  //   left_speed_reg(5);
-  //   delay(870);
-  //   stop();
-  //   break;
-  // }
-  // while(true)
-  // {
-  //   drive_cross(4);
-  //   fwd(0.7);
-  //   stop();
-  //   break;
-  // }
-  // }
+  for(int i = 0; i < 4; i++)
+  {
+    drive_cross(1);
+    orX += 1;
+  }
+
+  drive_to_line(Left, 0, 0, 0, 0);
+  // проезд по промжутку 12
+  drive_cross(1);
+  orY += 1;
+  // поворот на 2 ряд
+  drive_to_line(Left, 0, 0, 0, 0);
+
+  for(int i = 0; i < 4; i++)
+  {
+    drive_cross(1);
+    orX -= 1;
+  }
+
+  // съезд на промежуток 23
+  drive_to_line(Right, 0, 0, 0, 0);
+  // проезд по промежутку 23
+  drive_cross(1);
+  orY += 1;
+  // поворот на 3 ряд
+  drive_to_line(Right, 0, 0, 0, 0);
+  // проезд по 3 ряду
+  for(int i = 0; i < 4; i++)
+  {
+    drive_cross(1);
+    orX += 1;
+  }
+  Serial.print(orX);
+  Serial.print(" ");
+  Serial.println(orY);
+  drive_to_line(Right, 0, 0, 0, 0);
+  drive_cross(1);
+  drive_cross(1);
+  drive_to_line(Right, 0, 0, 0, 0);
+  drive_cross(1);
+  drive_cross(1);
+  drive_cross(1);
+  drive_cross(1);
 }
 
 void loop()
@@ -261,12 +163,5 @@ void loop()
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
-  float H_sens = digitalRead(A5);
-  float S_l = analogRead(A1);
-  float S_r = analogRead(A0);
   velest_tick();
-  Serial.print(S_l);
-  Serial.print(" ");
-  Serial.println(S_r);
-  // drive_line();
 }
