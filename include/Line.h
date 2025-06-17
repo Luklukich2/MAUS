@@ -3,7 +3,7 @@
 #include "Config.h"
 #include "speed_reg.h"
 
-void drive_line(float vel = 0.5)
+void drive_line(float vel)
 {
     float S_r = analogRead(A0);
     float S_l = analogRead(A1);

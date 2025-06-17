@@ -88,7 +88,8 @@ void fwd(float targ)
     }
     if (targ > 0)
     {
-      drive_line(5);
+      left_speed_reg(3);
+      right_speed_reg(3);
     }
 
     if (abs(left_enc) >= abs(Target) || abs(right_enc) >= abs(Target))

@@ -32,11 +32,12 @@ int f_cross = 0;
 String data;
 String send_data = "NO FAULT DETECTED";
 String mess;
+String answer;
 
-int loc_crack[3][5]{
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
+int loc_crack[3][3]{
+    1, 1, 1,
+    1, 1, 1,
+    1, 1, 1,
 };
 
 int read_cross()
@@ -73,15 +74,27 @@ void drive_cross(int wish_cross)
   while(true)
   {
     cross = read_cross();
-    drive_line();
-    if(digitalRead(A5) == 0)
+    drive_line(2.8);
+    if(digitalRead(A5) == 0) // проверка датчика Холла
     {
-      stop();
-      // Serial.println("MAGNET ACSESS");
-      hole_read(orX, orY);
-      send_data = "X: " + String(orX) + ", Y: " + String(orY);
+      while(true)
+      {
+        stop(); // остановка моторов
+        // Serial.println("MAGNET ACSESS"); // для отладки
+        hole_read(orX, orY); // записывание координат поломки
+        send_data = "CORDS: X: " + String(orX) + ", Y: " + String(orY); // формирование строки для отправки
+        radio.send(send_data, "SCADA", 100); // посылка строки
+        delay(100);
+        answer = radio.recv("ALESH", 100);
+        if(answer == "okay")
+        {
+          break;
+        }
+        delay(100);
+      }
       // Serial.println(send_data);
-      // X: 3, Y: 1
+      // CORDS: X: 3, Y: 1 // формат сообщения
+      break;
     }
     if(cross == wish_cross)
     {
@@ -124,7 +137,16 @@ void setup()
   //   radio.send("1234", "DOBRY", 100);
   // }
 
-  radio.send("PROG START", "DOBRY", 100);
+  // while(true)
+  // {
+  //   fwd(0.5);
+  //   delay(500);
+  //   stop();
+  //   fwd(-0.5);
+  //   delay(500);
+  //   stop();
+  // }
+  radio.send("PROG START", "SCADA", 100);
   while(true)
   {
     data = radio.recv("ALESH", 100);
@@ -136,13 +158,12 @@ void setup()
       break;
     }
   }
-  radio.send("ALESH GO", "DOBRY", 100);
-  for(int i = 0; i < 4; i++)
+  radio.send("ALESH GO", "SCADA", 100);
+  for(int i = 0; i < 3; i++)
   {
     drive_cross(1);
     orX += 1;
   }
-
   drive_to_line(Left, 0, 0, 0, 0);
   // проезд по промжутку 12
   drive_cross(1);
@@ -150,7 +171,7 @@ void setup()
   // поворот на 2 ряд
   drive_to_line(Left, 0, 0, 0, 0);
 
-  for(int i = 0; i < 4; i++)
+  for(int i = 0; i < 3; i++)
   {
     drive_cross(1);
     orX -= 1;
@@ -164,7 +185,7 @@ void setup()
   // поворот на 3 ряд
   drive_to_line(Right, 0, 0, 0, 0);
   // проезд по 3 ряду
-  for(int i = 0; i < 4; i++)
+  for(int i = 0; i < 3; i++)
   {
     drive_cross(1);
     orX += 1;
@@ -172,8 +193,8 @@ void setup()
   drive_to_line(Right, 0, 0, 0, 0);
   drive_cross(1);
   drive_cross(1);
-  drive_to_line(Right, 0, 0, 0, 0);
   drive_cross(1);
+  drive_to_line(Right, 0, 0, 0, 0);
   drive_cross(1);
   drive_cross(1);
   drive_cross(1);
@@ -181,7 +202,7 @@ void setup()
 
   while(true)
   {
-    radio.send(send_data, "DOBRY", 50);
+    radio.send(send_data, "SCADA", 50);
     // Serial.println(send_data);
   }
 }
