@@ -74,15 +74,14 @@ void drive_cross(int wish_cross)
   while(true)
   {
     cross = read_cross();
-    drive_line(2.8);
+    drive_line(2);
     if(digitalRead(A5) == 0) // проверка датчика Холла
     {
       while(true)
       {
         stop(); // остановка моторов
-        // Serial.println("MAGNET ACSESS"); // для отладки
         hole_read(orX, orY); // записывание координат поломки
-        send_data = "CORDS: X: " + String(orX) + ", Y: " + String(orY); // формирование строки для отправки
+        send_data = "*CORDS:X:" + String(orX) + ",Y:" + String(orY); // формирование строки для отправки
         radio.send(send_data, "SCADA", 100); // посылка строки
         delay(100);
         answer = radio.recv("ALESH", 100);
@@ -92,7 +91,6 @@ void drive_cross(int wish_cross)
         }
         delay(100);
       }
-      // Serial.println(send_data);
       // CORDS: X: 3, Y: 1 // формат сообщения
       break;
     }
@@ -105,8 +103,6 @@ void drive_cross(int wish_cross)
     }
   }
 }
-
-
 
 int state = 1;
 
@@ -122,7 +118,6 @@ void setup()
   l_motor_init();
   r_motor_init();
 
-  // radio_setup();
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
 
@@ -137,15 +132,6 @@ void setup()
   //   radio.send("1234", "DOBRY", 100);
   // }
 
-  // while(true)
-  // {
-  //   fwd(0.5);
-  //   delay(500);
-  //   stop();
-  //   fwd(-0.5);
-  //   delay(500);
-  //   stop();
-  // }
   radio.send("PROG START", "SCADA", 100);
   while(true)
   {
@@ -154,7 +140,7 @@ void setup()
     Serial.println(data);
     if (data == "start")
     {
-      Serial.println("START RECVD");
+      // Serial.println("START RECVD");
       break;
     }
   }
@@ -199,7 +185,6 @@ void setup()
   drive_cross(1);
   drive_cross(1);
   stop();
-
   while(true)
   {
     radio.send(send_data, "SCADA", 50);
