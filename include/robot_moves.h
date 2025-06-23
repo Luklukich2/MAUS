@@ -159,7 +159,8 @@ void stop()
   r_motor_tick(u_r);
 }
 
-void drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
+void 
+drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
 {
   uint32_t time0 = millis();
 
@@ -170,9 +171,9 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     if (side == Right)
     {
       // Serial.println(S_r);
-      left_speed_reg(5);
-      right_speed_reg(-5);
-      if (S_l > Line_threshold && millis() - time0 > TURN_DELAY)
+      left_speed_reg(6);
+      right_speed_reg(-6);
+      if (S_r > Line_threshold && millis() - time0 > TURN_DELAY)
       {
         stop();
         break;
@@ -180,8 +181,8 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
     }
     if (side == Left)
     {
-      left_speed_reg(-5);
-      right_speed_reg(5);
+      left_speed_reg(-6);
+      right_speed_reg(6);
       if (S_r > Line_threshold && millis() - time0 > TURN_DELAY)
       {
         stop();
@@ -214,7 +215,8 @@ void drive_to_line(float side, float cross, float f_cross, float wish_cross, flo
       }
     }
   }
-  fwd(-0.5);
+  fwd(-0.3);
+  stop();
 }
 
 void drive_to(float targX, float targY)

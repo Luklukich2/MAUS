@@ -74,14 +74,14 @@ void drive_cross(int wish_cross)
   while(true)
   {
     cross = read_cross();
-    drive_line(2);
+    drive_line(0.5);
     if(digitalRead(A5) == 0) // проверка датчика Холла
     {
       while(true)
       {
         stop(); // остановка моторов
         hole_read(orX, orY); // записывание координат поломки
-        send_data = "*CORDS:X:" + String(orX) + ",Y:" + String(orY); // формирование строки для отправки
+        send_data = "*CORDS:" + String(orX) + ":" + String(orY); // формирование строки для отправки
         radio.send(send_data, "SCADA", 100); // посылка строки
         delay(100);
         answer = radio.recv("ALESH", 100);
@@ -96,12 +96,13 @@ void drive_cross(int wish_cross)
     }
     if(cross == wish_cross)
     {
-      fwd(0.7);
+      fwd(0.8);
       stop();
       cross = 0;
       break;
     }
   }
+  stop();
 }
 
 int state = 1;
@@ -129,10 +130,13 @@ void setup()
 
   // while(true)
   // {
+  //   left_speed_reg(7);
+  //   right_speed_reg(-7);
+  // }
+  // while(true)
+  // {
   //   radio.send("1234", "DOBRY", 100);
   // }
-
-  radio.send("PROG START", "SCADA", 100);
   while(true)
   {
     data = radio.recv("ALESH", 100);
@@ -144,46 +148,32 @@ void setup()
       break;
     }
   }
-  radio.send("ALESH GO", "SCADA", 100);
+  radio.send("PROG START", "SCADA", 100);
   for(int i = 0; i < 3; i++)
   {
     drive_cross(1);
-    orX += 1;
   }
+  drive_to_line(Right, 0, 0, 0, 0);
+  stop();
+  drive_cross(1);
+  drive_to_line(Right, 0, 0, 0, 0);
+  stop();
+  for(int i = 0; i < 4; i++)
+  {
+    drive_cross(1);
+  }
+  fwd(0.4);
   drive_to_line(Left, 0, 0, 0, 0);
-  // проезд по промжутку 12
+  stop();
+  turn(-15);
+  stop();
   drive_cross(1);
-  orY += 1;
-  // поворот на 2 ряд
   drive_to_line(Left, 0, 0, 0, 0);
-
-  for(int i = 0; i < 3; i++)
+  stop();
+  for(int i = 0; i < 5; i++)
   {
     drive_cross(1);
-    orX -= 1;
   }
-
-  // съезд на промежуток 23
-  drive_to_line(Right, 0, 0, 0, 0);
-  // проезд по промежутку 23
-  drive_cross(1);
-  orY += 1;
-  // поворот на 3 ряд
-  drive_to_line(Right, 0, 0, 0, 0);
-  // проезд по 3 ряду
-  for(int i = 0; i < 3; i++)
-  {
-    drive_cross(1);
-    orX += 1;
-  }
-  drive_to_line(Right, 0, 0, 0, 0);
-  drive_cross(1);
-  drive_cross(1);
-  drive_cross(1);
-  drive_to_line(Right, 0, 0, 0, 0);
-  drive_cross(1);
-  drive_cross(1);
-  drive_cross(1);
   stop();
   while(true)
   {
@@ -194,9 +184,12 @@ void setup()
 
 void loop()
 {
+  // float S_r = analogRead(A0);
+  // float S_l = analogRead(A1);
   float left_enc = left_enc_tick();
   float right_enc = right_enc_tick();
   float g_right_w = right_velest_tick();
   float g_left_w = left_velest_tick();
   velest_tick();
+  // Serial.println(String(S_r) + " " + String(S_l));
 }

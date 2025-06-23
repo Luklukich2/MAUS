@@ -24,5 +24,5 @@
 #define Right             90.0
 #define D180              180.0
 #define Forward           0.0
-#define Line_threshold    350
+#define Line_threshold    850
 #define TURN_DELAY        1000
