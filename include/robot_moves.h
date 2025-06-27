@@ -64,6 +64,16 @@ void set_or_robot(float deg)
   or_robot_deg += err_orient;
 }
 
+void stop()
+{
+  // PLAN
+  float u_l = 0;
+  float u_r = 0;
+  // ACT
+  l_motor_tick(u_l);
+  r_motor_tick(u_r);
+}
+  
 void fwd(float targ)
 {
   left_enc_zero();
@@ -94,6 +104,7 @@ void fwd(float targ)
 
     if (abs(left_enc) >= abs(Target) || abs(right_enc) >= abs(Target))
     {
+      stop();
       break;
     }
   }
@@ -149,15 +160,6 @@ void left()
   }
 }
 
-void stop()
-{
-  // PLAN
-  float u_l = 0;
-  float u_r = 0;
-  // ACT
-  l_motor_tick(u_l);
-  r_motor_tick(u_r);
-}
 
 void 
 drive_to_line(float side, float cross, float f_cross, float wish_cross, float wish_sect)
@@ -183,7 +185,7 @@ drive_to_line(float side, float cross, float f_cross, float wish_cross, float wi
     {
       left_speed_reg(-6);
       right_speed_reg(6);
-      if (S_r > Line_threshold && millis() - time0 > TURN_DELAY)
+      if (S_l > Line_threshold && millis() - time0 > TURN_DELAY)
       {
         stop();
         break;
@@ -215,7 +217,6 @@ drive_to_line(float side, float cross, float f_cross, float wish_cross, float wi
       }
     }
   }
-  fwd(-0.3);
   stop();
 }
 

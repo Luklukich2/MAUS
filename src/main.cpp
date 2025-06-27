@@ -28,16 +28,20 @@ int comm1 = 0;
 int comm2 = 0;
 int cross = 0;
 int f_cross = 0;
+float left_enc = 0;
+float right_enc = 0;
 
 String data;
 String send_data = "NO FAULT DETECTED";
 String mess;
 String answer;
 
-int loc_crack[3][3]{
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
+int loc_crack[5][5]{
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
 };
 
 int read_cross()
@@ -87,6 +91,8 @@ void drive_cross(int wish_cross)
         answer = radio.recv("ALESH", 100);
         if(answer == "okay")
         {
+          fwd(0.4);
+          stop();
           break;
         }
         delay(100);
@@ -96,7 +102,6 @@ void drive_cross(int wish_cross)
     }
     if(cross == wish_cross)
     {
-      fwd(0.8);
       stop();
       cross = 0;
       break;
@@ -105,6 +110,39 @@ void drive_cross(int wish_cross)
   stop();
 }
 
+void turn90L(int side)
+{
+  fwd(0.5);
+  stop();
+  left_enc_zero();
+  right_enc_zero();
+  if(side == Left)
+  {
+    while(true)
+    {
+      left_enc = left_enc_tick();
+      left_speed_reg(0.5);
+      if(left_enc >= 6.5)
+      {
+        stop();
+        break;
+      }
+    }
+  }
+  if(side == Right)
+  {
+    while(true)
+    {
+      right_enc = right_enc_tick();
+      right_speed_reg(0.5);
+      if(right_enc >= 6.5)
+      {
+        stop();
+        break;
+      }
+    }
+  }
+}
 int state = 1;
 
 void setup()
@@ -128,6 +166,7 @@ void setup()
   Serial.println("INIT COMPLETE");
 
 
+  
   // while(true)
   // {
   //   left_speed_reg(7);
@@ -149,35 +188,37 @@ void setup()
     }
   }
   radio.send("PROG START", "SCADA", 100);
-  for(int i = 0; i < 3; i++)
-  {
-    drive_cross(1);
-  }
-  drive_to_line(Right, 0, 0, 0, 0);
-  stop();
-  drive_cross(1);
-  drive_to_line(Right, 0, 0, 0, 0);
-  stop();
   for(int i = 0; i < 4; i++)
   {
     drive_cross(1);
+    orX++;
   }
-  fwd(0.4);
-  drive_to_line(Left, 0, 0, 0, 0);
-  stop();
-  turn(-15);
-  stop();
+  turn90L(Left);
+  fwd(-0.6);
   drive_cross(1);
-  drive_to_line(Left, 0, 0, 0, 0);
-  stop();
-  for(int i = 0; i < 5; i++)
+  orY++;
+  turn90L(Left);
+  fwd(-0.6);
+  for(int i = 0; i < 4; i++)
   {
     drive_cross(1);
+    orX--;
   }
-  stop();
+  turn90L(Right);
+  fwd(-0.6);
+  drive_cross(1);
+  orY++;
+  turn90L(Right);
+  fwd(-0.6);
+  for(int i = 0; i < 4; i++)
+  {
+    drive_cross(1);
+    orX++;
+  }
+  fwd(0.6);
   while(true)
   {
-    radio.send(send_data, "SCADA", 50);
+    // radio.send(send_data, "SCADA", 50);
     // Serial.println(send_data);
   }
 }
